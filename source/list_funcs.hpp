@@ -8,16 +8,15 @@
  *   removing entries, filtering, and more.
  *
  *   For the latest updates and contributions, visit the project's GitHub repository.
- *   (GitHub Repository: https://github.com/ppkantorski/Ultrahand-Overlay)
+ *   (GitHub Repository: https://github.com/Ultra-NX/Ultra-Paw-Overlay)
  *
  *  Copyright (c) 2023 ppkantorski
  *  All rights reserved.
  ********************************************************************************/
 
-
 #pragma once
-#include <sys/stat.h>
 #include <dirent.h>
+#include <sys/stat.h>
 
 /**
  * @brief Removes entries from a vector of strings that match a specified entry.
@@ -29,8 +28,9 @@
  */
 void removeEntryFromList(const std::string& entry, std::vector<std::string>& itemsList) {
     itemsList.erase(std::remove_if(itemsList.begin(), itemsList.end(), [&](const std::string& item) {
-        return item.compare(0, entry.length(), entry) == 0;
-    }), itemsList.end());
+                        return item.compare(0, entry.length(), entry) == 0;
+                    }),
+                    itemsList.end());
 }
 
 /**

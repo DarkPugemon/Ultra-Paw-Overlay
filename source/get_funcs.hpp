@@ -1,6 +1,6 @@
 /********************************************************************************
  * File: get_funcs.hpp
- * Author: ppkantorski
+ * Author: ppkantorski, pugemon
  * Description:
  *   This header file contains functions for retrieving information and data
  *   from various sources, including file system and JSON files. It includes
@@ -8,19 +8,19 @@
  *   and parsing JSON data.
  *
  *   For the latest updates and contributions, visit the project's GitHub repository.
- *   (GitHub Repository: https://github.com/ppkantorski/Ultrahand-Overlay)
+ *   (GitHub Repository: https://github.com/Ultra-NX/Ultra-Paw-Overlay)
  *
- *  Copyright (c) 2023 ppkantorski
+ *  Copyright (c) 2023 ppkantorski, pugemon, redraz
  *  All rights reserved.
  ********************************************************************************/
 
 #pragma once
-#include <sys/stat.h>
 #include <dirent.h>
 #include <fnmatch.h>
 #include <jansson.h>
-#include "debug_funcs.hpp"
+#include <sys/stat.h>
 #include <string_funcs.hpp>
+#include "debug_funcs.hpp"
 
 // Constants for overlay module
 constexpr int OverlayLoaderModuleId = 348;
@@ -44,33 +44,31 @@ std::tuple<Result, std::string, std::string> getOverlayInfo(std::string filePath
     fseek(file, sizeof(NroStart), SEEK_SET);
     if (fread(&nroHeader, sizeof(NroHeader), 1, file) != 1) {
         fclose(file);
-        return { ResultParseError, "", "" };
+        return {ResultParseError, "", ""};
     }
 
     // Read asset header
     fseek(file, nroHeader.size, SEEK_SET);
     if (fread(&assetHeader, sizeof(NroAssetHeader), 1, file) != 1) {
         fclose(file);
-        return { ResultParseError, "", "" };
+        return {ResultParseError, "", ""};
     }
 
     // Read NACP struct
     fseek(file, nroHeader.size + assetHeader.nacp.offset, SEEK_SET);
     if (fread(&nacp, sizeof(NacpStruct), 1, file) != 1) {
         fclose(file);
-        return { ResultParseError, "", "" };
+        return {ResultParseError, "", ""};
     }
-    
+
     fclose(file);
 
     // Return overlay information
     return {
         ResultSuccess,
         std::string(nacp.lang[0].name, std::strlen(nacp.lang[0].name)),
-        std::string(nacp.display_version, std::strlen(nacp.display_version))
-    };
+        std::string(nacp.display_version, std::strlen(nacp.display_version))};
 }
-
 
 /**
  * @brief Reads the contents of a file and returns it as a string.
@@ -94,8 +92,6 @@ std::string getFileContents(const std::string& filePath) {
     }
     return content;
 }
-
-
 
 /**
  * @brief Concatenates the provided directory and file names to form a destination path.
@@ -160,8 +156,6 @@ std::string getFileNameFromURL(const std::string& url) {
     return "";
 }
 
-
-
 /**
  * @brief Extracts the name of the parent directory from a given file path.
  *
@@ -212,8 +206,6 @@ std::string getParentDirFromPath(const std::string& path) {
     }
     return path;
 }
-
-
 
 /**
  * @brief Gets a list of subdirectories in a directory.
@@ -283,7 +275,6 @@ std::vector<std::string> getFilesListFromDirectory(const std::string& directoryP
     return fileList;
 }
 
-
 /**
  * @brief Gets a list of files and folders based on a wildcard pattern.
  *
@@ -309,8 +300,8 @@ std::vector<std::string> getFilesListByWildcard(const std::string& pathPattern) 
         dirPath = pathPattern + "/";
     }
 
-    //logMessage("dirPath: " + dirPath);
-    //logMessage("wildcard: " + wildcard);
+    // logMessage("dirPath: " + dirPath);
+    // logMessage("wildcard: " + wildcard);
 
     std::vector<std::string> fileList;
 
@@ -319,7 +310,7 @@ std::vector<std::string> getFilesListByWildcard(const std::string& pathPattern) 
         wildcard = wildcard.substr(0, wildcard.size() - 1);  // Remove the trailing slash
     }
 
-    //logMessage("isFolderWildcard: " + std::to_string(isFolderWildcard));
+    // logMessage("isFolderWildcard: " + std::to_string(isFolderWildcard));
 
     DIR* dir = opendir(dirPath.c_str());
     if (dir != nullptr) {
@@ -330,14 +321,14 @@ std::vector<std::string> getFilesListByWildcard(const std::string& pathPattern) 
 
             bool isEntryDirectory = isDirectory(entryPath);
 
-            //logMessage("entryName: " + entryName);
-            //logMessage("entryPath: " + entryPath);
-            //logMessage("isFolderWildcard: " + std::to_string(isFolderWildcard));
-            //logMessage("isEntryDirectory: " + std::to_string(isEntryDirectory));
+            // logMessage("entryName: " + entryName);
+            // logMessage("entryPath: " + entryPath);
+            // logMessage("isFolderWildcard: " + std::to_string(isFolderWildcard));
+            // logMessage("isEntryDirectory: " + std::to_string(isEntryDirectory));
 
             if (isFolderWildcard && isEntryDirectory && fnmatch(wildcard.c_str(), entryName.c_str(), FNM_NOESCAPE) == 0) {
                 if (entryName != "." && entryName != "..") {
-                    fileList.push_back(entryPath+"/");
+                    fileList.push_back(entryPath + "/");
                 }
             } else if (!isFolderWildcard && !isEntryDirectory) {
                 std::size_t wildcardPos = wildcard.find('*');
@@ -357,11 +348,11 @@ std::vector<std::string> getFilesListByWildcard(const std::string& pathPattern) 
         closedir(dir);
     }
 
-    //std::string fileListAsString;
-    //for (const std::string& filePath : fileList) {
-    //    fileListAsString += filePath + "\n";
-    //}
-    //logMessage("File List:\n" + fileListAsString);
+    // std::string fileListAsString;
+    // for (const std::string& filePath : fileList) {
+    //     fileListAsString += filePath + "\n";
+    // }
+    // logMessage("File List:\n" + fileListAsString);
 
     return fileList;
 }

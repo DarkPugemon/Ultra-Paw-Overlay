@@ -1,16 +1,16 @@
 ##################################################################################
-# Makefile for Ultrahand Overlay
-# Author: ppkantorski
+# Makefile for Ultra-Paw Overlay
+# Authors: ppkantorski
 # Description:
-#   This Makefile is used to build the Ultrahand Overlay homebrew application for
+#   This Makefile is used to build the Ultra-Paw Overlay homebrew application for
 #   Nintendo Switch.
 #
 #   For more details and usage instructions, please refer to the project's
 #   documentation and README.md.
 #
-#   GitHub Repository: https://github.com/ppkantorski/Ultrahand-Overlay
+#   GitHub Repository: https://github.com/Ultra-NX/Ultra-Paw-Overlay
 #
-# Copyright (c) 2023 ppkantorski
+# Copyright (c) 2023 ppkantorski, pugemon, redraz
 # All rights reserved.
 ##################################################################################
 
@@ -53,8 +53,8 @@ include $(DEVKITPRO)/libnx/switch_rules
 #   of a homebrew executable (.nro). This is intended to be used for sysmodules.
 #   NACP building is skipped as well. #lib/Atmosphere-libs/libexosphere/source/pmic
 #---------------------------------------------------------------------------------
-APP_TITLE	:= Ultrahand
-APP_AUTHOR	:= b0rd2dEAth
+APP_TITLE	:= Ultra Paw
+APP_AUTHOR	:= pugemon
 APP_VERSION	:= 1.3.9
 TARGET	    := ovlmenu
 BUILD	    := build

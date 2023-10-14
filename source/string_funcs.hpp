@@ -3,24 +3,23 @@
  * Author: ppkantorski
  * Description:
  *   This header file contains function declarations and utility functions for string
- *   manipulation. These functions are used in the Ultrahand Overlay project to
+ *   manipulation. These functions are used in the Ultra Paw Overlay project to
  *   perform operations like trimming whitespaces, removing quotes, replacing
  *   multiple slashes, and more.
  *
  *   For the latest updates and contributions, visit the project's GitHub repository.
- *   (GitHub Repository: https://github.com/ppkantorski/Ultrahand-Overlay)
+ *   (GitHub Repository: https://github.com/Ultra-NX/Ultra-Paw-Overlay)
  *
  *  Copyright (c) 2023 ppkantorski
  *  All rights reserved.
  ********************************************************************************/
 
 #pragma once
+#include <jansson.h>
+#include <debug_funcs.hpp>
+#include <regex>
 #include <string>
 #include <vector>
-#include <jansson.h>
-#include <regex>
-#include <debug_funcs.hpp>
-
 
 /**
  * @brief Trims leading and trailing whitespaces from a string.
@@ -207,7 +206,6 @@ bool isFileOrDirectory(const std::string& path) {
     return (stat(path.c_str(), &buffer) == 0);
 }
 
-
 /**
  * @brief Converts a string to an integer.
  *
@@ -228,7 +226,6 @@ int stringToNumber(const std::string& input_string) {
     }
 }
 
-
 /**
  * @brief Splits a string into a vector of strings using a delimiter.
  *
@@ -240,25 +237,24 @@ int stringToNumber(const std::string& input_string) {
 std::vector<std::string> stringToList(const std::string& str) {
     std::string values, token;
     std::vector<std::string> result;
-    
+
     // Check if the input string starts and ends with '(' and ')'
     if ((str.front() == '(' && str.back() == ')') || (str.front() == '[' && str.back() == ']')) {
         // Remove the parentheses
         values = str.substr(1, str.size() - 2);
-        
+
         // Create a stringstream to split the string by commas
         std::istringstream ss(values);
-        
+
         while (std::getline(ss, token, ',')) {
             // Remove any leading or trailing spaces from the token
             token = token.substr(token.find_first_not_of(" "), token.find_last_not_of(" ") + 1);
             result.push_back(token);
         }
     }
-    
+
     return result;
 }
-
 
 /**
  * @brief Parses a JSON string into a json_t object.
@@ -272,7 +268,7 @@ std::vector<std::string> stringToList(const std::string& str) {
 json_t* stringToJson(const std::string& input) {
     json_t* jsonObj = nullptr;
     json_error_t error;
-    
+
     logMessage(input.c_str());
     jsonObj = json_loads(input.c_str(), 0, &error);
 
@@ -285,7 +281,6 @@ json_t* stringToJson(const std::string& input) {
     return jsonObj;
 }
 
-
 /**
  * @brief Formats a priority string to a desired width.
  *
@@ -296,22 +291,20 @@ json_t* stringToJson(const std::string& input) {
  * @param desiredWidth The desired width of the formatted string (default is 4).
  * @return A formatted priority string.
  */
-std::string formatPriorityString(const std::string& priority, int desiredWidth=4) {
+std::string formatPriorityString(const std::string& priority, int desiredWidth = 4) {
     std::string formattedString = priority;
-    
+
     if (int(priority.length()) > desiredWidth) {
-        formattedString = "9" + std::string(desiredWidth - 1, '9'); // Set to 9's if too long
-    } else{
+        formattedString = "9" + std::string(desiredWidth - 1, '9');  // Set to 9's if too long
+    } else {
         while (int(formattedString.length()) < desiredWidth) {
-            formattedString = "0"+formattedString;
+            formattedString = "0" + formattedString;
         }
     }
-
 
     // Convert the stringstream to a string and return it
     return formattedString;
 }
-
 
 /**
  * @brief Removes the part of the string after the first occurrence of '?' character.
@@ -323,18 +316,16 @@ std::string formatPriorityString(const std::string& priority, int desiredWidth=4
  * @param input The input string from which to remove the tag.
  * @return The input string with everything after the first '?' character removed.
  */
-std::string removeTag(const std::string &input) {
+std::string removeTag(const std::string& input) {
     size_t pos = input.find('?');
     if (pos != std::string::npos) {
         return input.substr(0, pos);
     }
-    return input; // Return the original string if no '?' is found.
+    return input;  // Return the original string if no '?' is found.
 }
 
-
-
 // This will take a string like "v1.3.5-abasdfasdfa" and output "1.3.5". string could also look like "test-1.3.5-1" or "v1.3.5" and we will only want "1.3.5"
-std::string cleanUpVersionLabel(const std::string &input) {
+std::string cleanUpVersionLabel(const std::string& input) {
     std::regex versionRegex(R"([v-]?(\d+\.\d+\.\d+))");
     std::smatch match;
 

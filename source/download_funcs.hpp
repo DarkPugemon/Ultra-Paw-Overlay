@@ -1,30 +1,28 @@
 /********************************************************************************
  * File: download_funcs.hpp
- * Author: ppkantorski
+ * Authors: ppkantorski
  * Description:
  *   This header file contains functions for downloading and extracting files
  *   using libcurl and zlib. It includes functions for downloading files from URLs,
  *   writing received data to a file, and extracting files from ZIP archives.
  *
  *   For the latest updates and contributions, visit the project's GitHub repository.
- *   (GitHub Repository: https://github.com/ppkantorski/Ultrahand-Overlay)
+ *   (GitHub Repository: https://github.com/Ultra-NX/Ultra-Paw-Overlay)
  *
- *  Copyright (c) 2023 ppkantorski
+ *  Copyright (c) 2023 ppkantorski, pugemon, redraz
  *  All rights reserved.
  ********************************************************************************/
 
 #pragma once
-#include <cstdio>
 #include <curl/curl.h>
 #include <zlib.h>
 #include <zzip/zzip.h>
-#include "string_funcs.hpp"
+#include <cstdio>
+#include "debug_funcs.hpp"
 #include "get_funcs.hpp"
 #include "path_funcs.hpp"
-#include "debug_funcs.hpp"
-//#include "json_funcs.hpp"
-
-
+#include "string_funcs.hpp"
+// #include "json_funcs.hpp"
 
 /**
  * @brief Callback function to write received data to a file.
@@ -41,7 +39,6 @@ size_t writeCallback(void* contents, size_t size, size_t nmemb, FILE* file) {
     return written;
 }
 
-
 /**
  * @brief Downloads a file from a URL to a specified destination.
  *
@@ -50,18 +47,17 @@ size_t writeCallback(void* contents, size_t size, size_t nmemb, FILE* file) {
  * @return True if the download was successful, false otherwise.
  */
 bool downloadFile(const std::string& url, const std::string& toDestination) {
-    
     if (url.find_first_of("{}") != std::string::npos) {
         logMessage(std::string("Invalid URL: ") + url);
         return false;
     }
-    
+
     std::string destination = toDestination.c_str();
-    
+
     // Check if the destination ends with "/"
     if (destination.back() == '/') {
         createDirectory(destination);
-        
+
         // Extract the filename from the URL
         size_t lastSlash = url.find_last_of('/');
         if (lastSlash != std::string::npos) {
@@ -71,17 +67,16 @@ bool downloadFile(const std::string& url, const std::string& toDestination) {
             logMessage(std::string("Invalid URL: ") + url);
             return false;
         }
-        
+
     } else {
-        createDirectory(destination.substr(0, destination.find_last_of('/'))+"/");
+        createDirectory(destination.substr(0, destination.find_last_of('/')) + "/");
     }
-    
-    
-    //curl_global_init(CURL_GLOBAL_SSL);
+
+    // curl_global_init(CURL_GLOBAL_SSL);
     const int MAX_RETRIES = 3;
     int retryCount = 0;
     CURL* curl = nullptr;
-    
+
     while (retryCount < MAX_RETRIES) {
         curl = curl_easy_init();
         if (curl) {
@@ -98,48 +93,47 @@ bool downloadFile(const std::string& url, const std::string& toDestination) {
         logMessage("Error initializing curl after multiple retries.");
         return false;
     }
-    
+
     FILE* file = fopen(destination.c_str(), "wb");
     if (!file) {
         logMessage(std::string("Error opening file: ") + destination);
         curl_easy_cleanup(curl);
         return false;
     }
-    
+
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
-    
+
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    
-    //curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 4096);
-    
+
+    // curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 4096);
+
     // Set a user agent
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
-    
+
     // Enable following redirects
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    
+
     // If you have a cacert.pem file, you can set it as a trusted CA
-    //curl_easy_setopt(curl, CURLOPT_CAINFO, "sdmc:/config/ultrahand/cacert.pem");
-    
-    
-    logMessage("destination: "+destination);
-    
+    // curl_easy_setopt(curl, CURLOPT_CAINFO, "sdmc:/config/ultrahand/cacert.pem");
+
+    logMessage("destination: " + destination);
+
     CURLcode result = curl_easy_perform(curl);
     if (result != CURLE_OK) {
         logMessage(std::string("Error downloading file: ") + curl_easy_strerror(result));
         curl_easy_cleanup(curl);
-        //curl_global_cleanup();
+        // curl_global_cleanup();
         fclose(file);
         // Delete the file if nothing was written to it
         std::remove(destination.c_str());
         return false;
     }
-    
+
     curl_easy_cleanup(curl);
-    //curl_global_cleanup();
+    // curl_global_cleanup();
     fclose(file);
-    
+
     // Check if the file is empty
     long fileSize = ftell(file);
     if (fileSize == 0) {
@@ -172,28 +166,28 @@ bool unzipFile(const std::string& zipFilePath, const std::string& toDestination)
 
         std::string fileName = entry.d_name;
         std::string extractedFilePath = toDestination + fileName;
-        
+
         // Skip over present directory entries when extracting files from a zip archive
         if (isDirectory(extractedFilePath)) {
             continue;
         }
-        
+
         // Extract the directory path from the extracted file path
         std::string directoryPath;
         if (extractedFilePath.back() != '/') {
-            directoryPath = extractedFilePath.substr(0, extractedFilePath.find_last_of('/'))+"/";
+            directoryPath = extractedFilePath.substr(0, extractedFilePath.find_last_of('/')) + "/";
         } else {
             directoryPath = extractedFilePath;
         }
-        
+
         createDirectory(directoryPath);
-        
+
         if (isDirectory(directoryPath)) {
             logMessage("directoryPath: success");
         } else {
             logMessage("directoryPath: failure");
         }
-        
+
         logMessage(std::string("directoryPath: ") + directoryPath);
 
         ZZIP_FILE* file = zzip_file_open(dir, entry.d_name, 0);
